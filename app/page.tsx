@@ -1,33 +1,86 @@
 "use client";
+
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function Home() {
-  const [score, setScore] = useState(0);
-  const [name, setName] = useState("User");
+export default function LoginPage() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleClick = () => {
-    setScore((prev) => prev + 1);
-  };
+  const router = useRouter();
+
+  async function handleRegister() {
+    try {
+      const res = await axios.post("/api/register", {
+        username,
+        password,
+      });
+      console.log("Register API success:", res.data);
+      localStorage.setItem("userId", res.data.id);
+
+      router.push("/home");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || "Register failed");
+    }
+  }
+
+  async function handleLogin() {
+    try {
+      const res = await axios.post("/api/login", {
+        username,
+        password,
+      });
+      console.log("Login API success:", res.data);
+      localStorage.setItem("userId", res.data.id);
+
+      router.push("/home");
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || "Login failed");
+    }
+  }
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-yellow-100 to-pink-100 px-4">
-      <h1 className="uppercase font-extrabold text-5xl mb-6 text-pink-600 drop-shadow">
-        🍪 Click Idle Game
+      <h1 className="text-4xl font-bold mb-6 text-pink-600">
+        Login / Register
       </h1>
 
-      <div className="flex flex-col items-center gap-2 mb-6 bg-white/80 p-6 rounded-xl shadow-lg">
-        <h2 className="text-3xl font-semibold text-gray-800">
-          Score: <span className="text-pink-500">{score}</span>
-        </h2>
-        <h3 className="text-xl text-gray-700">Hello, {name}!</h3>
-      </div>
+      <div className="bg-white/80 p-6 rounded-xl shadow-lg flex flex-col gap-4 w-full max-w-xs">
+        <input
+          className="p-3 rounded-md border border-gray-300"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-      <button
-        className="bg-pink-500 hover:bg-pink-600 active:scale-95 text-white font-bold text-2xl px-10 py-5 rounded-full shadow-lg transition duration-200"
-        onClick={handleClick}
-      >
-        🍪 Click Me!
-      </button>
+        <input
+          className="p-3 rounded-md border border-gray-300"
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          onClick={handleRegister}
+          className="bg-green-500 text-white p-3 rounded-md font-bold hover:bg-green-600"
+        >
+          Register
+        </button>
+
+        <button
+          onClick={handleLogin}
+          className="bg-blue-500 text-white p-3 rounded-md font-bold hover:bg-blue-600"
+        >
+          Login
+        </button>
+
+        {error && <p className="text-red-600 text-sm">{error}</p>}
+      </div>
     </main>
   );
 }
